@@ -9,6 +9,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
+
+/**
+ * This Class need to fix
+ */
 public class ClientHandler implements CompletionHandler<Integer, Attachment> {
     private Consumer<String> display;
 

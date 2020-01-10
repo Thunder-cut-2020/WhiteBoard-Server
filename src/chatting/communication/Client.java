@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -49,8 +48,6 @@ public class Client {
         boolean success = false;
         try {
             AsynchronousSocketChannel client = AsynchronousSocketChannel.open();
-
-
             Future<?> connectFuture = client.connect(new InetSocketAddress("127.0.0.1", 3000));
             connectFuture.get(10, TimeUnit.SECONDS);
 
@@ -83,6 +80,9 @@ public class Client {
         System.out.println("Client Send");
     }
 
+    /**
+     * Read String Data from Server
+     */
     public void readFromServer() {
         attachment.getBuffer().clear();
         attachment.getClient().read(attachment.getBuffer(), attachment, readHandler);
@@ -92,9 +92,18 @@ public class Client {
         this.display = display;
     }
 
+    /**
+     * Read Image Data from Server
+     */
     public void readImageFromServer(){
         attachment.getClient().read(attachment.getBuffer(), attachment,new ClientReadImageHandler(imageDisplay));
     }
+
+    /**
+     * Get Image in JLabel and convert Image to ByteBuffer
+     * When converting is finished, send to server
+     * @param label that have a image
+     */
     public void sendImageToServer(JLabel label) {
         try {
             ImageIcon imageIcon = (ImageIcon) label.getIcon();
@@ -123,6 +132,10 @@ public class Client {
         }
     }
 
+    /**
+     * Sorry testCode
+     * @return ImageIcon
+     */
     public ImageIcon getImage() {
         ImageIcon readImageIcon = null;
         try {

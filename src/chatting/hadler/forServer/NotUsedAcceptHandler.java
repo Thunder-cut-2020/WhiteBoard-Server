@@ -1,7 +1,6 @@
 package chatting.hadler.forServer;
 
 import chatting.core.Attachment;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,12 +12,15 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
-public class AcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Attachment> {
+/**
+ * Not used Class
+ */
+public class NotUsedAcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Attachment> {
 
     private ServerHandler serverHandler = new ServerHandler();
     private Vector<AsynchronousSocketChannel> clients;
 
-    public AcceptHandler() {
+    public NotUsedAcceptHandler() {
         clients = new Vector<>();
     }
 

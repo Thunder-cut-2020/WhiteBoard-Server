@@ -16,6 +16,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
 
+/**
+ * display method ==> Receive ImageIcon and set Icon JLabel in Client Window
+ *
+ * This method run only one time
+ */
 public class ClientReadImageHandler implements CompletionHandler<Integer, Attachment> {
 
     private Consumer<ImageIcon> display;

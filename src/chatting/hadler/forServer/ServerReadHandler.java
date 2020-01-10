@@ -1,5 +1,5 @@
 /*
- * TestReadHandler.java
+ * ServerReadHandler.java
  * Author : Arakene
  * Created Date : 2020-01-09
  */
@@ -14,10 +14,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
-public class TestReadHandler implements CompletionHandler<Integer, Attachment> {
+
+public class ServerReadHandler implements CompletionHandler<Integer, Attachment> {
     private Consumer<String> display;
 
-    public TestReadHandler(Consumer<String> display) {
+    public ServerReadHandler(Consumer<String> display) {
         this.display = display;
     }
 

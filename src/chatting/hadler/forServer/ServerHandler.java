@@ -14,7 +14,9 @@ import java.util.Scanner;
 import java.util.Vector;
 
 //TODO  1:N 접속 가능한 채팅서버 구현
-
+/**
+ * Not used Class
+ */
 public class ServerHandler implements CompletionHandler<Integer, Attachment> {
 
 

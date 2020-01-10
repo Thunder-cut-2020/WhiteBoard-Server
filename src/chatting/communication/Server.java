@@ -2,8 +2,8 @@ package chatting.communication;
 
 import chatting.core.Attachment;
 import chatting.hadler.forServer.ReadImageHandler;
-import chatting.hadler.forServer.TestAcceptHandler;
-import chatting.hadler.forServer.TestReadHandler;
+import chatting.hadler.forServer.ServerAcceptHandler;
+import chatting.hadler.forServer.ServerReadHandler;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -15,7 +15,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousServerSocketChannel;
-import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
@@ -43,23 +42,35 @@ public class Server {
         }
     }
 
+    /**
+     * Accept Method
+     * It will be keep running
+     */
     public void startAccept() {
         Attachment att = new Attachment();
         att.setServer(serverSocket);
         att.setClients(clients);
 //        serverSocket.accept(att,new TestAcceptHandler(display, this::readFromClient));
-        serverSocket.accept(att,new TestAcceptHandler(display, this::readDisplayImage));
+        serverSocket.accept(att,new ServerAcceptHandler(display, this::readDisplayImage));
     }
 
+    /**
+     * Read String data from clients
+     * If client don't run read Method start it and change isReadMode statement
+     */
     public void readFromClient(){
         for (Attachment client : clients) {
             if (!client.isReadMode()) {
                 client.setReadMode(true);
-                client.getClient().read(client.getBuffer(), client, new TestReadHandler(display));
+                client.getClient().read(client.getBuffer(), client, new ServerReadHandler(display));
             }
         }
     }
 
+    /**
+     * Send String data to All clients
+     * @param msg Server Message
+     */
     public void sentToAllClient(String msg){
         Charset charset = StandardCharsets.UTF_8;
         Iterator<Attachment> clientIterator = clients.iterator();
@@ -70,6 +81,10 @@ public class Server {
         }
     }
 
+    /**
+     * Read Image Data from client and display
+     * Now Read Method is run only one time
+     */
     public void readDisplayImage(){
         for (Attachment client : clients) {
             if (!client.isReadMode()) {
@@ -80,6 +95,11 @@ public class Server {
         }
     }
 
+    /**
+     * Get Image in JLabel and convert Image to ByteBuffer
+     * Finish it, send Image Data to all clients
+     * @param label that have a image
+     */
     public void sendImageToClients(JLabel label){
         try {
             ImageIcon imageIcon = (ImageIcon) label.getIcon();

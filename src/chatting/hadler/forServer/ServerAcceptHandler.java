@@ -1,28 +1,25 @@
 /*
- * TestAcceptHandler.java
+ * ServerAcceptHandler.java
  * Author : Arakene
  * Created Date : 2020-01-09
  */
 package chatting.hadler.forServer;
 
 import chatting.core.Attachment;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.function.Consumer;
 
-public class TestAcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Attachment> {
+/**
+ * I want Rename but error
+ */
+public class ServerAcceptHandler implements CompletionHandler<AsynchronousSocketChannel, Attachment> {
 
     private Consumer<String> display;
     private Runnable readHandler;
 
-    public TestAcceptHandler(Consumer<String> display, Runnable readHandler) {
+    public ServerAcceptHandler(Consumer<String> display, Runnable readHandler) {
         this.display = display;
         this.readHandler = readHandler;
     }

@@ -10,6 +10,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
+/**
+ * display Method ==> receive String Data and display in Client Window
+ *
+ * If once this method run, keep running until program shutdown
+ *
+ * Wait receiving data and work something and announce
+ */
 public class ClientReadHandler implements CompletionHandler<Integer, Attachment> {
 
     private Consumer<String> display;
