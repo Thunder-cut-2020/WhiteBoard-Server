@@ -113,7 +113,7 @@ public class SyncServer implements ClientCallback, Runnable {
     @Override
     public void disconnected(ClientInformation client) {
         try {
-            System.out.println(client.getClient().getRemoteAddress() + " is disconnected. " + getId(client));
+            System.out.println(client.getRemoteAddress() + " is disconnected. " + getId(client));
             if (client.getClient().isOpen()) {
                 client.getClient().close();
             }

@@ -9,6 +9,7 @@ import com.thunder_cut.processing.data.DataType;
 import com.thunder_cut.processing.data.ReceivedData;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -18,6 +19,7 @@ import java.nio.channels.SocketChannel;
 public class ClientInformation {
     private String name;
     private SocketChannel client;
+    private SocketAddress remoteAddress;
     private ClientCallback callback;
     private boolean op;
 
@@ -25,6 +27,11 @@ public class ClientInformation {
         this.client = client;
         this.callback = callback;
         op = false;
+        try {
+            remoteAddress = client.getRemoteAddress();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public SocketChannel getClient() {
@@ -93,5 +100,9 @@ public class ClientInformation {
 
     public int getId() {
         return callback.getId(this);
+    }
+
+    public SocketAddress getRemoteAddress() {
+        return remoteAddress;
     }
 }
