@@ -14,7 +14,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class is main class about server
@@ -26,7 +28,6 @@ public class SyncServer implements ClientCallback, Runnable {
     private ServerSocketChannel server;
     private final List<ClientInformation> clientGroup;
     private Process process;
-    private final Map<ClientInformation, List<ClientInformation>> clientMap;
 
     /**
      * All IP, Default Port
@@ -57,7 +58,6 @@ public class SyncServer implements ClientCallback, Runnable {
         }
         clientGroup = Collections.synchronizedList(new ArrayList<>());
         process = new Process(this::disconnected);
-        clientMap = new HashMap<>();
     }
 
     /**
@@ -71,13 +71,6 @@ public class SyncServer implements ClientCallback, Runnable {
                 SocketChannel client = server.accept();
                 System.out.println(client.getRemoteAddress() + " is connected.");
                 ClientInformation clientInfo = new ClientInformation(client, this);
-
-                synchronized (clientMap) {
-                    clientMap.put(clientInfo, clientGroup);
-                    for (ClientInformation information : clientMap.keySet()) {
-                        clientMap.get(information).add(clientInfo);
-                    }
-                }
                 synchronized (clientGroup) {
                     clientGroup.add(clientInfo);
                 }
@@ -106,7 +99,7 @@ public class SyncServer implements ClientCallback, Runnable {
 
     @Override
     public void received(ReceivedData data) {
-        process.processWithType(data, clientMap);
+        process.processWithType(data, clientGroup);
     }
 
     /**
@@ -123,11 +116,6 @@ public class SyncServer implements ClientCallback, Runnable {
             synchronized (clientGroup) {
                 clientGroup.remove(client);
             }
-            synchronized (clientMap) {
-                clientMap.remove(client);
-
-                changeClientList();
-            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,23 +128,13 @@ public class SyncServer implements ClientCallback, Runnable {
         }
     }
 
-    private void changeClientList() {
-        for (ClientInformation key : clientMap.keySet()) {
-            clientMap.get(key).clear();
-            clientMap.get(key).addAll(clientGroup);
-        }
-    }
-
     private void clearConnection() {
-        for (ClientInformation key : clientMap.keySet()) {
-            for (ClientInformation client : clientMap.get(key)) {
-                try {
-                    client.getClient().close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        for (ClientInformation client : clientGroup) {
+            try {
+                client.getClient().close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            clientMap.remove(key);
         }
         clientGroup.clear();
     }

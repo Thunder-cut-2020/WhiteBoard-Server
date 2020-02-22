@@ -90,4 +90,8 @@ public class ClientInformation {
         }
         callback.disconnected(this);
     }
+
+    public int getId() {
+        return callback.getId(this);
+    }
 }

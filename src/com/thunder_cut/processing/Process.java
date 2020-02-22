@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
 
@@ -23,7 +22,6 @@ import java.util.function.Consumer;
  * After Receiving data, work by data type
  */
 public class Process {
-
     private Consumer<ClientInformation> disconnect;
 
     public Process(Consumer<ClientInformation> disconnect) {
@@ -34,10 +32,10 @@ public class Process {
      * This work if type is command
      * Split command and work with given command in command process
      *
-     * @param data      this have data, type, src
-     * @param clientMap client list
+     * @param data       this have data, type, src
+     * @param clientList client list
      */
-    private void command(ReceivedData data, Map<ClientInformation, List<ClientInformation>> clientMap) {
+    private void command(ReceivedData data, List<ClientInformation> clientList) {
         ByteBuffer buffer = data.getBuffer();
         buffer.flip();
         String command = new String(buffer.array(), StandardCharsets.UTF_8);
@@ -47,56 +45,34 @@ public class Process {
         while (stringTokenizer.hasMoreTokens()) {
             commandToken[index++] = stringTokenizer.nextToken();
         }
-        CommandProcess commandProcess = new CommandProcess(clientMap, disconnect);
+        CommandProcess commandProcess = new CommandProcess(clientList, disconnect);
         try {
             commandProcess.getCommandMap().get(CommandType.acceptable(commandToken[0], data.getSrc().isOp())).accept(data, commandToken);
         } catch (NullPointerException e) {
-            errorMessage(data.getSrc(), clientMap);
+            errorMessage(data.getSrc(), clientList);
         }
     }
 
-    private void errorMessage(ClientInformation src, Map<ClientInformation, List<ClientInformation>> clientMap) {
+    private void errorMessage(ClientInformation src, List<ClientInformation> clientList) {
         String errorMessage = "Error! Given command do not exist";
-        int srcIndex = 0;
-        for (int destIndex = 0; destIndex < clientMap.get(src).size(); destIndex++) {
-            ClientInformation destination = clientMap.get(src).get(destIndex);
-            if (src == destination) {
-                srcIndex = destIndex;
-                SendingData sendingData = new SendingData(srcIndex, destIndex, DataType.MSG, errorMessage.getBytes());
-                write(src, destination, sendingData);
-                return;
-            }
-        }
+        int id = src.getId();
+        SendingData sendingData = new SendingData(id, id, DataType.MSG, errorMessage.getBytes());
+        write(src, src, sendingData);
     }
 
     /**
      * Generate message or image data and write to all client in client list
      *
-     * @param data      this have data, type, src
-     * @param clientMap client list
+     * @param data       this have data, type, src
+     * @param clientList client list
      */
-    private void notCommand(ReceivedData data, Map<ClientInformation, List<ClientInformation>> clientMap) {
-        for (int index = 0; index < clientMap.get(data.getSrc()).size(); index++) {
-            ClientInformation destination = clientMap.get(data.getSrc()).get(index);
-            int[] IDs = findID(data.getSrc(), destination, clientMap);
-            SendingData sendingData = new SendingData(IDs[0], IDs[1], data.getDataType(), data.getBuffer().array());
-            write(data.getSrc(), destination, sendingData);
+    private void notCommand(ReceivedData data, List<ClientInformation> clientList) {
+        ClientInformation src = data.getSrc();
+        int srcId = src.getId();
+        for (ClientInformation dest : clientList) {
+            SendingData sendingData = new SendingData(srcId, dest.getId(), data.getDataType(), data.getBuffer().array());
+            write(src, dest, sendingData);
         }
-    }
-
-
-    private int[] findID(ClientInformation src, ClientInformation dest, Map<ClientInformation, List<ClientInformation>> clientMap) {
-        ClientInformation[] clientArr = clientMap.keySet().toArray(ClientInformation[]::new);
-        int[] IDs = new int[2];
-        for (int index = 0; index < clientArr.length; index++) {
-            if (src == clientArr[index]) {
-                IDs[0] = index;
-            }
-            if (dest == clientArr[index]) {
-                IDs[1] = index;
-            }
-        }
-        return IDs;
     }
 
     /**
@@ -113,11 +89,11 @@ public class Process {
         }
     }
 
-    public void processWithType(ReceivedData data, Map<ClientInformation, List<ClientInformation>> clientMap) {
+    public void processWithType(ReceivedData data, List<ClientInformation> clientList) {
         if (data.getDataType().equals(DataType.CMD)) {
-            command(data, clientMap);
+            command(data, clientList);
         } else {
-            notCommand(data, clientMap);
+            notCommand(data, clientList);
         }
     }
 }
