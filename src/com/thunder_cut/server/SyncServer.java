@@ -10,6 +10,7 @@ import com.thunder_cut.server.data.ReceivedData;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
@@ -82,6 +83,22 @@ public class SyncServer implements ClientCallback, Runnable {
                 clientInfo.read();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public void send(byte[] data, ClientInformation dest) {
+        try {
+            dest.getClient().write(ByteBuffer.wrap(data));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void send(byte[] data) {
+        synchronized (clientGroup) {
+            for (ClientInformation dest : clientGroup) {
+                send(data, dest);
             }
         }
     }
