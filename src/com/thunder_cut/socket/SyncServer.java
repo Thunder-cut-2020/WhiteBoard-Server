@@ -81,19 +81,21 @@ public class SyncServer implements ClientCallback, Runnable {
         }
     }
 
-    public void send(byte[] data, ClientInformation dest) {
+    public void send(ByteBuffer data, ClientInformation dest) {
         try {
-            dest.getClient().write(ByteBuffer.wrap(data));
-        } catch (Exception e) {
-            e.printStackTrace();
+            dest.getClient().write(data);
+        } catch (IOException e) {
+            disconnected(dest);
         }
     }
 
-    public void send(byte[] data) {
+    public void send(ByteBuffer data) {
+        ClientInformation[] array;
         synchronized (clientGroup) {
-            for (ClientInformation dest : clientGroup) {
-                send(data, dest);
-            }
+            array = clientGroup.toArray(new ClientInformation[clientGroup.size()]);
+        }
+        for (ClientInformation dest : array) {
+            send(data, dest);
         }
     }
 

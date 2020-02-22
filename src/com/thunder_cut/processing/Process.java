@@ -49,7 +49,7 @@ public class Process {
     private void sendMessage(String message, ClientInformation dest) {
         int id = dest.getId();
         SendingData sendingData = new SendingData(id, id, DataType.MSG, message.getBytes());
-        server.send(sendingData.generateDataByType(dest).array(), dest);
+        server.send(sendingData.generateDataByType(dest), dest);
     }
 
     /**
@@ -61,9 +61,13 @@ public class Process {
     private void broadcast(ReceivedData data, List<ClientInformation> clientList) {
         ClientInformation src = data.getSrc();
         int srcId = src.getId();
-        for (ClientInformation dest : clientList) {
+        ClientInformation[] array;
+        synchronized (clientList) {
+            array = clientList.toArray(new ClientInformation[clientList.size()]);
+        }
+        for (ClientInformation dest : array) {
             SendingData sendingData = new SendingData(srcId, dest.getId(), data.getDataType(), data.getBuffer().array());
-            server.send(sendingData.generateDataByType(src).array(), dest);
+            server.send(sendingData.generateDataByType(src), dest);
         }
     }
 
