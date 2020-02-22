@@ -57,7 +57,7 @@ public class SyncServer implements ClientCallback, Runnable {
             e.printStackTrace();
         }
         clientGroup = Collections.synchronizedList(new ArrayList<>());
-        process = new Process(this::disconnected);
+        process = new Process(this);
     }
 
     /**
