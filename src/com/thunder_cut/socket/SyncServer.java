@@ -4,9 +4,10 @@
  * Created Date : 2020-02-04
  */
 
-package com.thunder_cut.server;
+package com.thunder_cut.socket;
 
-import com.thunder_cut.server.data.ReceivedData;
+import com.thunder_cut.processing.Process;
+import com.thunder_cut.processing.data.ReceivedData;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

@@ -1,4 +1,4 @@
-package com.thunder_cut.server.data;
+package com.thunder_cut.processing.data;
 
 /**
  * op --> 서버권한 부여 서버에서 쓰는 명령어를 사용가능하게 됨 + 클라의 기능,커맨드는 계속 유지
@@ -25,26 +25,25 @@ public enum CommandType {
         this.op = b;
     }
 
-    private CommandType getCommand(String type){
-        for(CommandType commandType : CommandType.values()){
-            if(commandType.command.equals(type)){
+    private CommandType getCommand(String type) {
+        for (CommandType commandType : CommandType.values()) {
+            if (commandType.command.equals(type)) {
                 return commandType;
             }
         }
         return null;
     }
 
-    public static CommandType acceptable(String type, boolean op){
-        if (!op){
-            for(CommandType commandType : CommandType.values()){
-                if(commandType.command.equals(type) && !commandType.op){
+    public static CommandType acceptable(String type, boolean op) {
+        if (!op) {
+            for (CommandType commandType : CommandType.values()) {
+                if (commandType.command.equals(type) && !commandType.op) {
                     return commandType;
                 }
             }
-        }
-        else{
-            for(CommandType commandType : CommandType.values()){
-                if(commandType.command.equals(type)){
+        } else {
+            for (CommandType commandType : CommandType.values()) {
+                if (commandType.command.equals(type)) {
                     return commandType;
                 }
             }

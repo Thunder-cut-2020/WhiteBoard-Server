@@ -3,10 +3,10 @@
  * Author : Arakene
  * Created Date : 2020-02-04
  */
-package com.thunder_cut.server;
+package com.thunder_cut.socket;
 
-import com.thunder_cut.server.data.DataType;
-import com.thunder_cut.server.data.ReceivedData;
+import com.thunder_cut.processing.data.DataType;
+import com.thunder_cut.processing.data.ReceivedData;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,7 +35,7 @@ public class ClientInformation {
         new Thread(this::reading).start();
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
@@ -85,7 +85,7 @@ public class ClientInformation {
             buffer.flip();
             DataType dataType = DataType.valueOf(type);
             byte[] data = buffer.array();
-            ReceivedData receivedData = new ReceivedData(this,DataType.valueOf(type),buffer);
+            ReceivedData receivedData = new ReceivedData(this, DataType.valueOf(type), buffer);
             callback.received(receivedData);
         }
         callback.disconnected(this);

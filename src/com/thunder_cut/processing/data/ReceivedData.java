@@ -3,9 +3,9 @@
  * Author : Arakene
  * Created Date : 2020-02-14
  */
-package com.thunder_cut.server.data;
+package com.thunder_cut.processing.data;
 
-import com.thunder_cut.server.ClientInformation;
+import com.thunder_cut.socket.ClientInformation;
 
 import java.nio.ByteBuffer;
 

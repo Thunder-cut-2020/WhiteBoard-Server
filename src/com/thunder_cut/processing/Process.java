@@ -3,17 +3,20 @@
  * Author : Arakene
  * Created Date : 2020-02-14
  */
-package com.thunder_cut.server;
+package com.thunder_cut.processing;
 
-import com.thunder_cut.server.data.CommandType;
-import com.thunder_cut.server.data.DataType;
-import com.thunder_cut.server.data.ReceivedData;
-import com.thunder_cut.server.data.SendingData;
+import com.thunder_cut.processing.data.CommandType;
+import com.thunder_cut.processing.data.DataType;
+import com.thunder_cut.processing.data.ReceivedData;
+import com.thunder_cut.processing.data.SendingData;
+import com.thunder_cut.socket.ClientInformation;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Consumer;
 
 /**
@@ -89,7 +92,7 @@ public class Process {
             if (src == clientArr[index]) {
                 IDs[0] = index;
             }
-            if(dest == clientArr[index]){
+            if (dest == clientArr[index]) {
                 IDs[1] = index;
             }
         }

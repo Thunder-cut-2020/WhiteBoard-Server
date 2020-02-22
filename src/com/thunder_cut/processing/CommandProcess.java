@@ -3,12 +3,16 @@
  * Author : Arakene
  * Created Date : 2020-02-14
  */
-package com.thunder_cut.server;
+package com.thunder_cut.processing;
 
-import com.thunder_cut.server.data.CommandType;
-import com.thunder_cut.server.data.ReceivedData;
+import com.thunder_cut.processing.data.CommandType;
+import com.thunder_cut.processing.data.ReceivedData;
+import com.thunder_cut.socket.ClientInformation;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -35,7 +39,8 @@ public class CommandProcess {
 
     /**
      * Disconnect specific client
-     * @param data data, type, src
+     *
+     * @param data   data, type, src
      * @param tokens split command
      */
     private void kick(ReceivedData data, String[] tokens) {
@@ -48,7 +53,8 @@ public class CommandProcess {
 
     /**
      * Set client name by given data
-     * @param data data, type, src
+     *
+     * @param data   data, type, src
      * @param tokens split command
      */
     private void setName(ReceivedData data, String[] tokens) {
@@ -60,7 +66,7 @@ public class CommandProcess {
      * Circuit All keys in clientMap and Remove self
      * If do not exist in list, add self
      *
-     * @param data data, type, src
+     * @param data   data, type, src
      * @param tokens split command
      */
     private void blind(ReceivedData data, String[] tokens) {
@@ -93,6 +99,7 @@ public class CommandProcess {
     /**
      * Find Client include given name
      * If don't exist return null
+     *
      * @param clientName client's name
      * @return clientinfo that include clientName
      */
