@@ -12,4 +12,6 @@ public interface ClientCallback {
     void received(ReceivedData data);
 
     void disconnected(ClientInformation client);
+
+    int getId(ClientInformation client);
 }

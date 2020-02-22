@@ -115,6 +115,13 @@ public class SyncServer implements ClientCallback, Runnable {
         }
     }
 
+    @Override
+    public int getId(ClientInformation client) {
+        synchronized (clientGroup) {
+            return clientGroup.indexOf(client);
+        }
+    }
+
     private void changeClientList() {
         for (ClientInformation key : clientMap.keySet()) {
             clientMap.get(key).clear();
