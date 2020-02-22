@@ -74,7 +74,7 @@ public class SyncServer implements ClientCallback, Runnable {
                     clientGroup.add(clientInfo);
                 }
                 clientInfo.read();
-                System.out.println(client.getRemoteAddress() + " is connected. " + getId(clientInfo));
+                System.out.println(client.getRemoteAddress() + " is connected. " + getId(clientInfo) + " of " + clientGroup.size());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -113,7 +113,7 @@ public class SyncServer implements ClientCallback, Runnable {
     @Override
     public void disconnected(ClientInformation client) {
         try {
-            System.out.println(client.getRemoteAddress() + " is disconnected. " + getId(client));
+            System.out.println(client.getRemoteAddress() + " is disconnected. " + getId(client) + " of " + clientGroup.size());
             if (client.getClient().isOpen()) {
                 client.getClient().close();
             }
