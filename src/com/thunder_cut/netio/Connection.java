@@ -20,6 +20,7 @@ public class Connection {
     public final int id;
     private final ConnectionCallback callback;
     private ExecutorService executorService;
+    private String name;
 
     public Connection(SocketChannel socketChannel, ConnectionCallback callback) throws Exception {
         this.socketChannel = socketChannel;
@@ -27,6 +28,7 @@ public class Connection {
         id = socketAddress.hashCode();
         this.callback = callback;
         executorService = Executors.newSingleThreadExecutor();
+        name = "user" + id;
     }
 
     public void start() {
@@ -82,5 +84,13 @@ public class Connection {
             e.printStackTrace();
         }
         callback.disconnected(this);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
