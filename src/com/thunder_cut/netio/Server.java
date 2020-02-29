@@ -67,19 +67,18 @@ public class Server implements ConnectionCallback {
                 SocketChannel socketChannel = serverSocketChannel.accept();
                 Connection connection = new Connection(socketChannel, this);
                 new Thread(() -> {
-                    Connection pending = connection;
-                    byte[] hello = pending.read().array();
+                    ByteBuffer hello = connection.read();
                     if (Objects.isNull(hello)) {
-                        pending.disconnect();
+                        connection.disconnect();
                         return;
                     }
 
                     PublicKey publicKey;
                     try {
-                        publicKey = KeyFactory.getInstance(PublicKeyEncryption.ALGORITHM).generatePublic(new X509EncodedKeySpec(hello));
+                        publicKey = KeyFactory.getInstance(PublicKeyEncryption.ALGORITHM).generatePublic(new X509EncodedKeySpec(hello.array()));
                     } catch (Exception e) {
                         e.printStackTrace();
-                        pending.disconnect();
+                        connection.disconnect();
                         return;
                     }
 
@@ -88,11 +87,11 @@ public class Server implements ConnectionCallback {
                     ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + encryptedKey.length);
                     byteBuffer.putInt(encryptedKey.length);
                     byteBuffer.put(encryptedKey);
-                    pending.write(byteBuffer);
+                    connection.write(byteBuffer);
 
                     connections.add(connection);
-                    pending.start();
-                    System.out.println(pending.socketAddress + " (" + pending.id + ")" + " is connected.");
+                    connection.start();
+                    System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is connected.");
                 });
             } catch (Exception e) {
                 e.printStackTrace();
