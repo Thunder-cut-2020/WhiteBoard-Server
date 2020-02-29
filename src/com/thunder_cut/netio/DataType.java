@@ -7,7 +7,6 @@
 package com.thunder_cut.netio;
 
 public enum DataType {
-    HELLO('H'),
     IMAGE('I'),
     COMMAND('C'),
     MESSAGE('M');
@@ -16,5 +15,14 @@ public enum DataType {
 
     DataType(char code) {
         this.code = code;
+    }
+
+    public static DataType valueOf(char code) {
+        for (DataType dataType : DataType.values()) {
+            if (dataType.code == code) {
+                return dataType;
+            }
+        }
+        return null;
     }
 }
