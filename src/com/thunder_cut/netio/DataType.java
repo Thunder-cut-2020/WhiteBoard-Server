@@ -9,7 +9,8 @@ package com.thunder_cut.netio;
 public enum DataType {
     IMAGE('I'),
     COMMAND('C'),
-    MESSAGE('M');
+    MESSAGE('M'),
+    LIST('L');
 
     public final char code;
 
