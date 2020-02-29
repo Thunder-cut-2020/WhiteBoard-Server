@@ -127,7 +127,15 @@ public class Server implements ConnectionCallback {
 
     @Override
     public void received(Connection source, ByteBuffer data) {
-        System.out.println(source.id + ": " + new String(data.array(), StandardCharsets.UTF_8)); // for testing
+        Data parsed = new Data(data.array(), secretKey);
+        if (parsed.dataType == DataType.COMMAND) {
+        } else {
+            if (parsed.dataType == DataType.MESSAGE) {
+                System.out.println(source.id + ": " + new String(parsed.getData(), StandardCharsets.UTF_8));
+            }
+            parsed.setSrcId(source.id);
+            send(parsed.toEncrypted(secretKey));
+        }
     }
 
     @Override
