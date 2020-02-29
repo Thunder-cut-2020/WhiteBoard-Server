@@ -11,7 +11,6 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Base64;
 import java.util.Objects;
 
 public class PublicKeyEncryption {
@@ -21,8 +20,6 @@ public class PublicKeyEncryption {
     public final PrivateKey privateKey;
     private Cipher encryption;
     private Cipher decryption;
-    private final Base64.Encoder encoder;
-    private final Base64.Decoder decoder;
 
     public PublicKeyEncryption(KeyPair keyPair) {
         this(keyPair.getPublic(), keyPair.getPrivate());
@@ -37,8 +34,6 @@ public class PublicKeyEncryption {
         if (Objects.nonNull(privateKey)) {
             decryption = makeCipher(Cipher.DECRYPT_MODE, privateKey);
         }
-        encoder = Base64.getEncoder();
-        decoder = Base64.getDecoder();
     }
 
     public byte[] encrypt(byte[] data) {
@@ -47,8 +42,7 @@ public class PublicKeyEncryption {
         }
 
         try {
-            byte[] encrypted = encryption.doFinal(data);
-            return encoder.encode(encrypted);
+            return encryption.doFinal(data);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -61,7 +55,6 @@ public class PublicKeyEncryption {
         }
 
         try {
-            byte[] decoded = decoder.decode(data);
             return decryption.doFinal(data);
         } catch (Exception e) {
             e.printStackTrace();
