@@ -92,6 +92,8 @@ public class Server implements ConnectionCallback {
                     connections.add(connection);
                     connection.start();
                     System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is connected.");
+
+                    send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -108,14 +110,14 @@ public class Server implements ConnectionCallback {
     }
 
     public void send(ByteBuffer data) {
-        Connection[] array = connections.toArray(new Connection[connections.size()]);
+        Connection[] array = connections.toArray(new Connection[0]);
         for (Connection destination : array) {
             send(destination, data);
         }
     }
 
     private Connection getConnectionById(int id) {
-        Connection[] array = connections.toArray(new Connection[connections.size()]);
+        Connection[] array = connections.toArray(new Connection[0]);
         for (Connection connection : array) {
             if (connection.id == id) {
                 return connection;
@@ -141,5 +143,18 @@ public class Server implements ConnectionCallback {
     public void disconnected(Connection connection) {
         System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is disconnected.");
         connections.remove(connection);
+    }
+
+    private String connectionsToString() {
+        Connection[] array = connections.toArray(new Connection[0]);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Connection connection : array) {
+            stringBuilder.append(connection.id);
+            stringBuilder.append('/');
+            stringBuilder.append(connection.getName());
+            stringBuilder.append('/');
+        }
+        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+        return stringBuilder.toString();
     }
 }
