@@ -16,12 +16,23 @@ public class SymmetricKeyEncryption {
     private final Cipher encryption;
     private final Cipher decryption;
 
+    /**
+     * Create a SymmectricKeyEncryption.
+     *
+     * @param symmetricKey a symmetric key
+     */
     public SymmetricKeyEncryption(SecretKey symmetricKey) {
         this.symmetricKey = symmetricKey;
         encryption = makeCipher(Cipher.ENCRYPT_MODE);
         decryption = makeCipher(Cipher.DECRYPT_MODE);
     }
 
+    /**
+     * Encrypt data with a symmetric key.
+     *
+     * @param data plain data
+     * @return encrypted data
+     */
     public byte[] encrypt(byte[] data) {
         try {
             return encryption.doFinal(data);
@@ -31,6 +42,12 @@ public class SymmetricKeyEncryption {
         }
     }
 
+    /**
+     * Decrypt data with a symmetric key.
+     *
+     * @param data encrypted data
+     * @return decrypted data
+     */
     public byte[] decrypt(byte[] data) {
         try {
             return decryption.doFinal(data);

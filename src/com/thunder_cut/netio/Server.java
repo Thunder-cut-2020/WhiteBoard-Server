@@ -35,14 +35,30 @@ public class Server implements ConnectionCallback {
     private ExecutorService executorService;
     private SecretKey secretKey;
 
+    /**
+     * Create a ServerSocketChannel.
+     *
+     * @param address
+     * @param port
+     */
     public Server(String address, int port) {
         this(new InetSocketAddress(address, port));
     }
 
+    /**
+     * Create a ServerSocketChannel.
+     *
+     * @param port
+     */
     public Server(int port) {
         this(new InetSocketAddress(port));
     }
 
+    /**
+     * Create a ServerSocketChannel.
+     *
+     * @param local SocketAddress
+     */
     public Server(SocketAddress local) {
         try {
             serverSocketChannel = ServerSocketChannel.open();
@@ -55,10 +71,16 @@ public class Server implements ConnectionCallback {
         executorService = Executors.newSingleThreadExecutor();
     }
 
+    /**
+     * Start accepting connections.
+     */
     public void start() {
         executorService.submit(this::accepting);
     }
 
+    /**
+     * Stop accepting connections.
+     */
     public void stop() {
         executorService.shutdownNow();
     }
@@ -103,14 +125,31 @@ public class Server implements ConnectionCallback {
         }
     }
 
+    /**
+     * Send data to specific connection.
+     *
+     * @param destination where to send data
+     * @param data        data to send
+     */
     public void send(Connection destination, ByteBuffer data) {
         destination.write(data);
     }
 
+    /**
+     * Send data to specific connection by ID.
+     *
+     * @param destinationId where to send data
+     * @param data          data to send
+     */
     public void send(int destinationId, ByteBuffer data) {
         getConnectionById(destinationId).write(data);
     }
 
+    /**
+     * Send data to all connections.
+     *
+     * @param data data to send
+     */
     public void send(ByteBuffer data) {
         Connection[] array = connections.toArray(new Connection[0]);
         for (Connection destination : array) {

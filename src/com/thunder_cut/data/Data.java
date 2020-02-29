@@ -16,12 +16,25 @@ public class Data {
     private int srcId;
     private byte[] data;
 
+    /**
+     * Create wrapped data.
+     *
+     * @param dataType data type of data
+     * @param srcId    source connection's ID
+     * @param data     plain data
+     */
     public Data(DataType dataType, int srcId, byte[] data) {
         this.dataType = dataType;
         this.srcId = srcId;
         this.data = data;
     }
 
+    /**
+     * Create wrapped data by encrypted data.
+     *
+     * @param encryptedData encrypted data
+     * @param secretKey     a symmetric key
+     */
     public Data(byte[] encryptedData, SecretKey secretKey) {
         SymmetricKeyEncryption encryption = new SymmetricKeyEncryption(secretKey);
         byte[] decrypted = encryption.decrypt(encryptedData);
@@ -43,6 +56,12 @@ public class Data {
         return data;
     }
 
+    /**
+     * Returns data size and encrypted data for transfer.
+     *
+     * @param secretKey a symmetric key
+     * @return data size and encrypted data.
+     */
     public ByteBuffer toEncrypted(SecretKey secretKey) {
         SymmetricKeyEncryption encryption = new SymmetricKeyEncryption(secretKey);
         byte[] encrypted = encryption.encrypt(data);

@@ -21,10 +21,21 @@ public class PublicKeyEncryption {
     private Cipher encryption;
     private Cipher decryption;
 
+    /**
+     * Create a PublicKeyEncryption.
+     *
+     * @param keyPair a public key and a private key
+     */
     public PublicKeyEncryption(KeyPair keyPair) {
         this(keyPair.getPublic(), keyPair.getPrivate());
     }
 
+    /**
+     * Create a PublicKeyEncryption.
+     *
+     * @param publicKey  a public key
+     * @param privateKey a private key
+     */
     public PublicKeyEncryption(PublicKey publicKey, PrivateKey privateKey) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -36,6 +47,12 @@ public class PublicKeyEncryption {
         }
     }
 
+    /**
+     * Encrypt data with a public key.
+     *
+     * @param data plain data
+     * @return encrypted data
+     */
     public byte[] encrypt(byte[] data) {
         if (Objects.isNull(publicKey)) {
             return null;
@@ -49,6 +66,12 @@ public class PublicKeyEncryption {
         }
     }
 
+    /**
+     * Decrypt data with a private key.
+     *
+     * @param data encrypted data
+     * @return decrypted data
+     */
     public byte[] decrypt(byte[] data) {
         if (Objects.isNull(privateKey)) {
             return null;

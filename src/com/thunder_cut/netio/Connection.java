@@ -22,6 +22,13 @@ public class Connection {
     private ExecutorService executorService;
     private String name;
 
+    /**
+     * Create a connection.
+     *
+     * @param socketChannel SocketChannel accepted by ServerSocketChannel
+     * @param callback      ServerSocketChannel with ConnectionCallback
+     * @throws Exception
+     */
     public Connection(SocketChannel socketChannel, ConnectionCallback callback) throws Exception {
         this.socketChannel = socketChannel;
         socketAddress = socketChannel.getRemoteAddress();
@@ -31,14 +38,25 @@ public class Connection {
         name = "user" + id;
     }
 
+    /**
+     * Start reading SocketChannel buffer.
+     */
     public void start() {
         executorService.submit(this::reading);
     }
 
+    /**
+     * Stop reading SocketChannel buffer.
+     */
     public void stop() {
         executorService.shutdownNow();
     }
 
+    /**
+     * Read SocketChannel buffer.
+     *
+     * @return received data
+     */
     public ByteBuffer read() {
         ByteBuffer size = ByteBuffer.allocate(4);
         ByteBuffer data;
@@ -66,6 +84,11 @@ public class Connection {
         disconnect();
     }
 
+    /**
+     * Write SocketChannel buffer.
+     *
+     * @param data data to send
+     */
     public void write(ByteBuffer data) {
         try {
             socketChannel.write(data);
@@ -74,6 +97,9 @@ public class Connection {
         }
     }
 
+    /**
+     * Disconnect SocketChannel.
+     */
     public void disconnect() {
         stop();
         try {
