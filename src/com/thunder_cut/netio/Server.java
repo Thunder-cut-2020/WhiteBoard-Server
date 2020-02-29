@@ -6,6 +6,8 @@
 
 package com.thunder_cut.netio;
 
+import com.thunder_cut.data.Data;
+import com.thunder_cut.data.DataType;
 import com.thunder_cut.encryption.PublicKeyEncryption;
 import com.thunder_cut.encryption.SymmetricKeyEncryption;
 

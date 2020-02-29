@@ -4,7 +4,7 @@
  * Created Date: 2020-02-29
  */
 
-package com.thunder_cut.netio;
+package com.thunder_cut.data;
 
 import com.thunder_cut.encryption.SymmetricKeyEncryption;
 
