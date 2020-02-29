@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 
 public class Data {
     public final DataType dataType;
-    public final int srcId;
+    private int srcId;
     private byte[] data;
 
     public Data(DataType dataType, int srcId, byte[] data) {
@@ -29,6 +29,14 @@ public class Data {
         dataType = DataType.valueOf(byteBuffer.getChar());
         srcId = byteBuffer.getInt();
         byteBuffer.get(data);
+    }
+
+    public int getSrcId() {
+        return srcId;
+    }
+
+    public void setSrcId(int srcId) {
+        this.srcId = srcId;
     }
 
     public byte[] getData() {
