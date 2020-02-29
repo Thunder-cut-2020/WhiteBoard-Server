@@ -62,11 +62,13 @@ public class Connection {
         ByteBuffer data;
         try {
             int ret = socketChannel.read(size);
+            size.flip();
             if (ret == -1) {
                 return null;
             }
             data = ByteBuffer.allocate(size.getInt());
             socketChannel.read(data);
+            data.flip();
             return data;
         } catch (IOException e) {
             return null;
@@ -91,6 +93,7 @@ public class Connection {
      */
     public void write(ByteBuffer data) {
         try {
+            data.flip();
             socketChannel.write(data);
         } catch (IOException e) {
             disconnect();
