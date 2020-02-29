@@ -6,15 +6,24 @@
 
 package com.thunder_cut.netio;
 
+import com.thunder_cut.encryption.PublicKeyEncryption;
+import com.thunder_cut.encryption.SymmetricKeyEncryption;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -22,6 +31,7 @@ public class Server implements ConnectionCallback {
     private ServerSocketChannel serverSocketChannel;
     private List<Connection> connections;
     private ExecutorService executorService;
+    private SecretKey secretKey;
 
     public Server(String address, int port) {
         this(new InetSocketAddress(address, port));
@@ -35,6 +45,7 @@ public class Server implements ConnectionCallback {
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(local);
+            secretKey = KeyGenerator.getInstance(SymmetricKeyEncryption.ALGORITHM).generateKey();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -55,9 +66,34 @@ public class Server implements ConnectionCallback {
             try {
                 SocketChannel socketChannel = serverSocketChannel.accept();
                 Connection connection = new Connection(socketChannel, this);
-                connections.add(connection);
-                connection.start();
-                System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is connected.");
+                new Thread(() -> {
+                    Connection pending = connection;
+                    byte[] hello = pending.read().array();
+                    if (Objects.isNull(hello)) {
+                        pending.disconnect();
+                        return;
+                    }
+
+                    PublicKey publicKey;
+                    try {
+                        publicKey = KeyFactory.getInstance(PublicKeyEncryption.ALGORITHM).generatePublic(new X509EncodedKeySpec(hello));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        pending.disconnect();
+                        return;
+                    }
+
+                    PublicKeyEncryption publicKeyEncryption = new PublicKeyEncryption(publicKey, null);
+                    byte[] encryptedKey = publicKeyEncryption.encrypt(secretKey.getEncoded());
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + encryptedKey.length);
+                    byteBuffer.putInt(encryptedKey.length);
+                    byteBuffer.put(encryptedKey);
+                    pending.write(byteBuffer);
+
+                    connections.add(connection);
+                    pending.start();
+                    System.out.println(pending.socketAddress + " (" + pending.id + ")" + " is connected.");
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }

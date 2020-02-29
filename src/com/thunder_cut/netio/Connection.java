@@ -37,7 +37,7 @@ public class Connection {
         executorService.shutdownNow();
     }
 
-    private ByteBuffer read() {
+    public ByteBuffer read() {
         ByteBuffer size = ByteBuffer.allocate(4);
         ByteBuffer data;
         try {
