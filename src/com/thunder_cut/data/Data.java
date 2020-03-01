@@ -63,11 +63,17 @@ public class Data {
      * @return data size and encrypted data.
      */
     public ByteBuffer toEncrypted(SecretKey secretKey) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Character.BYTES + Integer.BYTES + data.length);
+        byteBuffer.putChar(dataType.code);
+        byteBuffer.putInt(srcId);
+        byteBuffer.put(data);
+
         SymmetricKeyEncryption encryption = new SymmetricKeyEncryption(secretKey);
-        byte[] encrypted = encryption.encrypt(data);
-        ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + encrypted.length);
+        byte[] encrypted = encryption.encrypt(byteBuffer.array());
+        byteBuffer = ByteBuffer.allocate(Integer.BYTES + encrypted.length);
         byteBuffer.putInt(encrypted.length);
         byteBuffer.put(encrypted);
+
         return byteBuffer;
     }
 }
