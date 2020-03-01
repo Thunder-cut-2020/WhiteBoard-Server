@@ -41,6 +41,7 @@ public class Data {
         ByteBuffer byteBuffer = ByteBuffer.wrap(decrypted);
         dataType = DataType.valueOf(byteBuffer.getChar());
         srcId = byteBuffer.getInt();
+        data = new byte[byteBuffer.limit() - byteBuffer.position()];
         byteBuffer.get(data);
     }
 
