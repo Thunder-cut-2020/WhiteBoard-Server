@@ -7,7 +7,9 @@
 package com.thunder_cut.encryption;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.security.SecureRandom;
 
 public class SymmetricKeyEncryption {
     public static final String ALGORITHM = "AES";
@@ -62,6 +64,23 @@ public class SymmetricKeyEncryption {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(mode, symmetricKey);
             return cipher;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Generate a symmetric key/
+     *
+     * @param strength length of key
+     * @return a symmetric key
+     */
+    public static SecretKey generateKey(int strength) {
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
+            keyGenerator.init(strength, SecureRandom.getInstance("SHA1PRNG"));
+            return keyGenerator.generateKey();
         } catch (Exception e) {
             e.printStackTrace();
             return null;

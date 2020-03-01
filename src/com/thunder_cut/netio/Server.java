@@ -11,7 +11,6 @@ import com.thunder_cut.data.DataType;
 import com.thunder_cut.encryption.PublicKeyEncryption;
 import com.thunder_cut.encryption.SymmetricKeyEncryption;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -63,7 +62,7 @@ public class Server implements ConnectionCallback {
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(local);
-            secretKey = KeyGenerator.getInstance(SymmetricKeyEncryption.ALGORITHM).generateKey();
+            secretKey = SymmetricKeyEncryption.generateKey(256);
         } catch (Exception e) {
             e.printStackTrace();
         }
