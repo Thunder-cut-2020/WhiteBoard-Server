@@ -87,19 +87,23 @@ public class Server implements ConnectionCallback {
             try {
                 SocketChannel socketChannel = serverSocketChannel.accept();
                 Connection connection = new Connection(socketChannel, this);
-                new Thread(() -> {
+                System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is accepted.");
+                new Thread(() -> { // handshake
+                    // Receive a public key.
                     ByteBuffer hello = connection.read();
                     if (Objects.isNull(hello)) {
                         connection.disconnect();
                         return;
                     }
 
+                    // Make a public key from received data.
                     PublicKey publicKey = PublicKeyEncryption.makePublicKey(hello.array());
                     if (Objects.isNull(publicKey)) {
                         connection.disconnect();
                         return;
                     }
 
+                    // Encrypt a symmetric key using RSA.
                     PublicKeyEncryption publicKeyEncryption = new PublicKeyEncryption(publicKey, null);
                     byte[] encryptedKey = publicKeyEncryption.encrypt(secretKey.getEncoded());
                     ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + encryptedKey.length);
@@ -107,12 +111,14 @@ public class Server implements ConnectionCallback {
                     byteBuffer.put(encryptedKey);
                     connection.write(byteBuffer);
 
+                    // Add a connection in list and start receiving data.
                     connections.add(connection);
                     connection.start();
                     System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is connected.");
 
+                    // Send a connection list.
                     send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
-                });
+                }).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
