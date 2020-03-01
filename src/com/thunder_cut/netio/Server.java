@@ -87,7 +87,7 @@ public class Server implements ConnectionCallback {
             try {
                 SocketChannel socketChannel = serverSocketChannel.accept();
                 Connection connection = new Connection(socketChannel, this);
-                System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is accepted.");
+                System.out.println(connection.socketAddress + " (" + connection.id + ") is accepted.");
                 new Thread(() -> { // handshake
                     // Receive a public key.
                     ByteBuffer hello = connection.read();
@@ -114,7 +114,7 @@ public class Server implements ConnectionCallback {
                     // Add a connection in list and start receiving data.
                     connections.add(connection);
                     connection.start();
-                    System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is connected.");
+                    System.out.println(connection.socketAddress + " (" + connection.id + ") is connected.");
 
                     // Send a connection list.
                     send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
@@ -182,8 +182,11 @@ public class Server implements ConnectionCallback {
 
     @Override
     public void disconnected(Connection connection) {
-        System.out.println(connection.socketAddress + " (" + connection.id + ")" + " is disconnected.");
-        connections.remove(connection);
+        System.out.println(connection.socketAddress + " (" + connection.id + ") is disconnected.");
+        boolean ret = connections.remove(connection);
+        if (ret) {
+            send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+        }
     }
 
     private String connectionsToString() {
