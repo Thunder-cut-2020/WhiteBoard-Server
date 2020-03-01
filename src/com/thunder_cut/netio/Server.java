@@ -18,9 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
 import java.security.PublicKey;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -96,11 +94,8 @@ public class Server implements ConnectionCallback {
                         return;
                     }
 
-                    PublicKey publicKey;
-                    try {
-                        publicKey = KeyFactory.getInstance(PublicKeyEncryption.ALGORITHM).generatePublic(new X509EncodedKeySpec(hello.array()));
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    PublicKey publicKey = PublicKeyEncryption.makePublicKey(hello.array());
+                    if (Objects.isNull(publicKey)) {
                         connection.disconnect();
                         return;
                     }

@@ -7,10 +7,8 @@
 package com.thunder_cut.encryption;
 
 import javax.crypto.Cipher;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
 
 public class PublicKeyEncryption {
@@ -90,6 +88,23 @@ public class PublicKeyEncryption {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(mode, key);
             return cipher;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Make a public key from byte[].
+     *
+     * @param publicKey byte[]
+     * @return PublicKey
+     */
+    public static PublicKey makePublicKey(byte[] publicKey) {
+        try {
+            X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(publicKey);
+            KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+            return keyFactory.generatePublic(x509EncodedKeySpec);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
