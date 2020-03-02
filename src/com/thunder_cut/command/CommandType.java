@@ -7,6 +7,7 @@
 package com.thunder_cut.command;
 
 public enum CommandType {
+    HELP("/HELP"),
     NAME("/NAME"),
     IGNORE("/IGNORE"),
     KICK("/KICK"),
@@ -16,5 +17,14 @@ public enum CommandType {
 
     CommandType(String command) {
         this.command = command;
+    }
+
+    public static CommandType getCommand(String command) {
+        for (CommandType commandType : CommandType.values()) {
+            if (commandType.command.equals(command)) {
+                return commandType;
+            }
+        }
+        return null;
     }
 }
