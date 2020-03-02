@@ -6,6 +6,7 @@
 
 package com.thunder_cut.netio;
 
+import com.thunder_cut.command.CommandType;
 import com.thunder_cut.data.Data;
 import com.thunder_cut.data.DataType;
 import com.thunder_cut.encryption.PublicKeyEncryption;
@@ -171,9 +172,15 @@ public class Server implements ConnectionCallback {
     public void received(Connection source, ByteBuffer data) {
         Data parsed = new Data(data.array(), secretKey);
         if (parsed.dataType == DataType.COMMAND) {
+            String command = new String(parsed.getData(), StandardCharsets.UTF_8);
+            String[] args = command.split(" ");
+            if (CommandType.getCommand(args[0]) == CommandType.NAME) {
+                source.setName(command.substring(command.indexOf(' ') + 1));
+                send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+            }
         } else {
             if (parsed.dataType == DataType.MESSAGE) {
-                System.out.println(source.id + ": " + new String(parsed.getData(), StandardCharsets.UTF_8));
+                System.out.println(source.getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
             }
             parsed.setSrcId(source.id);
             send(parsed.toEncrypted(secretKey));
