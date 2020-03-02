@@ -67,7 +67,9 @@ public class Connection {
                 return null;
             }
             data = ByteBuffer.allocate(size.getInt());
-            socketChannel.read(data);
+            while (data.hasRemaining()) {
+                socketChannel.read(data);
+            }
             data.flip();
             return data;
         } catch (IOException e) {
