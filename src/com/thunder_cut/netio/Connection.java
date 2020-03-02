@@ -58,7 +58,7 @@ public class Connection {
      * @return received data
      */
     public ByteBuffer read() {
-        ByteBuffer size = ByteBuffer.allocate(4);
+        ByteBuffer size = ByteBuffer.allocate(Integer.BYTES);
         ByteBuffer data;
         try {
             int ret = socketChannel.read(size);
@@ -94,11 +94,15 @@ public class Connection {
      * @param data data to send
      */
     public void write(ByteBuffer data) {
+        if (!socketChannel.isConnected()) {
+            return;
+        }
+
+        data.flip();
         try {
-            data.flip();
             socketChannel.write(data);
-        } catch (IOException e) {
-            disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
