@@ -6,6 +6,8 @@
 
 package com.thunder_cut.netio;
 
+import com.thunder_cut.ux.Naming;
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -35,7 +37,7 @@ public class Connection {
         id = socketAddress.hashCode();
         this.callback = callback;
         executorService = Executors.newSingleThreadExecutor();
-        name = "user" + id;
+        name = Naming.generateName();
     }
 
     /**
