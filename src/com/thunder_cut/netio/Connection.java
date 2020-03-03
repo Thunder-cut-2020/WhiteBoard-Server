@@ -6,7 +6,7 @@
 
 package com.thunder_cut.netio;
 
-import com.thunder_cut.ux.Naming;
+import com.thunder_cut.data.User;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -22,7 +22,7 @@ public class Connection {
     public final int id;
     private final ConnectionCallback callback;
     private ExecutorService executorService;
-    private String name;
+    private User user;
 
     /**
      * Create a connection.
@@ -37,7 +37,7 @@ public class Connection {
         id = socketAddress.hashCode();
         this.callback = callback;
         executorService = Executors.newSingleThreadExecutor();
-        name = Naming.generateName();
+        user = new User(id);
     }
 
     /**
@@ -123,11 +123,7 @@ public class Connection {
         callback.disconnected(this);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public User getUser() {
+        return user;
     }
 }
