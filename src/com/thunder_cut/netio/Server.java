@@ -171,19 +171,22 @@ public class Server implements ConnectionCallback {
     @Override
     public void received(Connection source, ByteBuffer data) {
         Data parsed = new Data(data.array(), secretKey);
-        if (parsed.dataType == DataType.COMMAND) {
+        if (parsed.dataType == DataType.IMAGE) {
+            source.getUser().setImage(parsed.getData());
+            // temporary codes
+            parsed.setSrcId(source.id);
+            send(parsed.toEncrypted(secretKey));
+        } else if (parsed.dataType == DataType.MESSAGE) {
+            System.out.println(source.getUser().getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
+            parsed.setSrcId(source.id);
+            send(parsed.toEncrypted(secretKey));
+        } else if (parsed.dataType == DataType.COMMAND) {
             String command = new String(parsed.getData(), StandardCharsets.UTF_8);
             String[] args = command.split(" ");
             if (CommandType.getCommand(args[0]) == CommandType.NAME) {
                 source.getUser().setName(command.substring(command.indexOf(' ') + 1));
                 send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
             }
-        } else {
-            if (parsed.dataType == DataType.MESSAGE) {
-                System.out.println(source.getUser().getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
-            }
-            parsed.setSrcId(source.id);
-            send(parsed.toEncrypted(secretKey));
         }
     }
 
