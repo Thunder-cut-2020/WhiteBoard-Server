@@ -1,5 +1,5 @@
 /*
- * ImageTimer.java
+ * ImageSender.java
  * Author: Seokjin Yoon
  * Created Date: 2020-03-08
  */
@@ -10,11 +10,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class ImageTimer {
+public class ImageSender {
     private ScheduledExecutorService scheduledExecutorService;
     private long fps;
 
-    public ImageTimer() {
+    public ImageSender() {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
