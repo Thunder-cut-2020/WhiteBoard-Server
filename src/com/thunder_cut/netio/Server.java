@@ -9,6 +9,7 @@ package com.thunder_cut.netio;
 import com.thunder_cut.command.CommandType;
 import com.thunder_cut.data.Data;
 import com.thunder_cut.data.DataType;
+import com.thunder_cut.data.ImageSender;
 import com.thunder_cut.encryption.PublicKeyEncryption;
 import com.thunder_cut.encryption.SymmetricKeyEncryption;
 
@@ -32,6 +33,7 @@ public class Server implements ConnectionCallback {
     private List<Connection> connections;
     private ExecutorService executorService;
     private SecretKey secretKey;
+    private ImageSender imageSender;
 
     /**
      * Create a ServerSocketChannel.
@@ -61,12 +63,13 @@ public class Server implements ConnectionCallback {
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(local);
-            secretKey = SymmetricKeyEncryption.generateKey(256);
         } catch (Exception e) {
             e.printStackTrace();
         }
         connections = Collections.synchronizedList(new ArrayList<>());
         executorService = Executors.newSingleThreadExecutor();
+        secretKey = SymmetricKeyEncryption.generateKey(256);
+        imageSender = new ImageSender(this);
     }
 
     /**
@@ -74,12 +77,14 @@ public class Server implements ConnectionCallback {
      */
     public void start() {
         executorService.submit(this::accepting);
+        imageSender.start(30);
     }
 
     /**
      * Stop accepting connections.
      */
     public void stop() {
+        imageSender.stop();
         executorService.shutdownNow();
     }
 
@@ -173,9 +178,6 @@ public class Server implements ConnectionCallback {
         Data parsed = new Data(data.array(), secretKey);
         if (parsed.dataType == DataType.IMAGE) {
             source.getUser().setImage(parsed.getData());
-            // temporary codes
-            parsed.setSrcId(source.id);
-            send(parsed.toEncrypted(secretKey));
         } else if (parsed.dataType == DataType.MESSAGE) {
             System.out.println(source.getUser().getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
             parsed.setSrcId(source.id);
@@ -210,5 +212,13 @@ public class Server implements ConnectionCallback {
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         return stringBuilder.toString();
+    }
+
+    public List<Connection> getConnections() {
+        return connections;
+    }
+
+    public SecretKey getSecretKey() {
+        return secretKey;
     }
 }

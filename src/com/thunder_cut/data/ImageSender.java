@@ -6,6 +6,9 @@
 
 package com.thunder_cut.data;
 
+import com.thunder_cut.netio.Connection;
+import com.thunder_cut.netio.Server;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,9 +16,11 @@ import java.util.concurrent.TimeUnit;
 public class ImageSender {
     private ScheduledExecutorService scheduledExecutorService;
     private long fps;
+    private Server server;
 
-    public ImageSender() {
+    public ImageSender(Server server) {
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        this.server = server;
     }
 
     public void start(long fps) {
@@ -28,6 +33,14 @@ public class ImageSender {
     }
 
     private void run() {
+        Connection[] connections = server.getConnections().toArray(new Connection[0]);
+        for (Connection connection : connections) {
+            User user = connection.getUser();
+            if (user.isImageUpdated()) {
+                user.setImageUpdated(false);
+                server.send(new Data(DataType.IMAGE, user.id, user.getImage()).toEncrypted(server.getSecretKey()));
+            }
+        }
     }
 
     public long getFps() {
