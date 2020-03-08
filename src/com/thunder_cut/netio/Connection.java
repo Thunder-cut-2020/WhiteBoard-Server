@@ -114,8 +114,6 @@ public class Connection {
     public void disconnect() {
         stop();
         try {
-            socketChannel.shutdownInput();
-            socketChannel.shutdownOutput();
             socketChannel.close();
         } catch (Exception e) {
             e.printStackTrace();
