@@ -9,6 +9,8 @@ package com.thunder_cut.data;
 public class User {
     public final int id;
     private String name;
+    private byte[] image;
+    private boolean imageUpdated;
 
     public User(int id) {
         this.id = id;
@@ -21,5 +23,22 @@ public class User {
 
     public void setName(String name) {
         this.name = name.strip();
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+        imageUpdated = true;
+    }
+
+    public boolean isImageUpdated() {
+        return imageUpdated;
+    }
+
+    public void setImageUpdated(boolean imageUpdated) {
+        this.imageUpdated = imageUpdated;
     }
 }
