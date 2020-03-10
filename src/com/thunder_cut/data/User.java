@@ -6,6 +6,8 @@
 
 package com.thunder_cut.data;
 
+import java.util.Arrays;
+
 public class User {
     public final int id;
     private String name;
@@ -30,6 +32,10 @@ public class User {
     }
 
     public void setImage(byte[] image) {
+        if (Arrays.equals(this.image, image)) {
+            return;
+        }
+
         this.image = image;
         imageUpdated = true;
     }
