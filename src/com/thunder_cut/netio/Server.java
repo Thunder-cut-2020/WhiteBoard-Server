@@ -124,6 +124,7 @@ public class Server implements ConnectionCallback {
 
                     // Send a connection list.
                     send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+                    imageSender.refresh();
                 }).start();
             } catch (Exception e) {
                 e.printStackTrace();

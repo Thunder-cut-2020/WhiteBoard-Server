@@ -9,6 +9,7 @@ package com.thunder_cut.data;
 import com.thunder_cut.netio.Connection;
 import com.thunder_cut.netio.Server;
 
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +40,17 @@ public class ImageSender {
             if (user.isImageUpdated()) {
                 user.setImageUpdated(false);
                 server.send(new Data(DataType.IMAGE, user.id, user.getImage()).toEncrypted(server.getSecretKey()));
+            }
+        }
+    }
+
+    public void refresh() {
+        Connection[] connections = server.getConnections().toArray(new Connection[0]);
+        for (Connection connection : connections) {
+            User user = connection.getUser();
+            byte[] image = user.getImage();
+            if (Objects.nonNull(image)) {
+                server.send(new Data(DataType.IMAGE, user.id, image).toEncrypted(server.getSecretKey()));
             }
         }
     }
