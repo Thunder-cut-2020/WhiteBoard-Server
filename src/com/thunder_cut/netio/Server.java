@@ -10,6 +10,7 @@ import com.thunder_cut.WhiteBoardServer;
 import com.thunder_cut.command.CommandType;
 import com.thunder_cut.data.Data;
 import com.thunder_cut.data.DataType;
+import com.thunder_cut.data.User;
 import com.thunder_cut.encryption.PublicKeyEncryption;
 
 import javax.crypto.SecretKey;
@@ -145,7 +146,10 @@ public class Server implements ConnectionCallback {
      * @param data          data to send
      */
     public void send(int destinationId, ByteBuffer data) {
-        getConnectionById(destinationId).write(data);
+        Connection destination = getConnectionById(destinationId);
+        if (Objects.nonNull(destination)) {
+            destination.write(data);
+        }
     }
 
     /**
@@ -174,17 +178,25 @@ public class Server implements ConnectionCallback {
     public void received(Connection source, ByteBuffer data) {
         SecretKey secretKey = owner.getSecretKey();
         Data parsed = new Data(data.array(), secretKey);
+        User user = source.getUser();
         if (parsed.dataType == DataType.IMAGE) {
-            source.getUser().setImage(parsed.getData());
+            user.setImage(parsed.getData());
         } else if (parsed.dataType == DataType.MESSAGE) {
-            System.out.println(source.getUser().getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
+            System.out.println(user.getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
             parsed.setSrcId(source.id);
             send(parsed.toEncrypted(secretKey));
         } else if (parsed.dataType == DataType.COMMAND) {
             String command = new String(parsed.getData(), StandardCharsets.UTF_8);
             String[] args = command.split(" ");
             if (CommandType.getCommand(args[0]) == CommandType.NAME) {
-                source.getUser().setName(command.substring(command.indexOf(' ') + 1));
+                String oldName = user.getName();
+                user.setName(command.substring(command.indexOf(' ') + 1));
+                String newName = user.getName();
+                if (!oldName.equals(newName)) {
+                    String message = oldName + " → " + newName;
+                    System.out.println(message);
+                    send(new Data(DataType.MESSAGE, user.id, message.getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+                }
                 send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
             }
         }
