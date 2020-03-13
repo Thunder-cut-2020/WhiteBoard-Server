@@ -6,11 +6,9 @@
 
 package com.thunder_cut;
 
-import com.thunder_cut.netio.Server;
-
 public class MainClass {
     public static void main(String[] args) {
-        Server server = new Server(3001);
-        server.start();
+        WhiteBoardServer whiteBoardServer = new WhiteBoardServer();
+        whiteBoardServer.start();
     }
 }

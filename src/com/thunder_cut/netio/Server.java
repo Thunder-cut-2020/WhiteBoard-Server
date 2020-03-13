@@ -6,12 +6,11 @@
 
 package com.thunder_cut.netio;
 
+import com.thunder_cut.WhiteBoardServer;
 import com.thunder_cut.command.CommandType;
 import com.thunder_cut.data.Data;
 import com.thunder_cut.data.DataType;
-import com.thunder_cut.data.ImageSender;
 import com.thunder_cut.encryption.PublicKeyEncryption;
-import com.thunder_cut.encryption.SymmetricKeyEncryption;
 
 import javax.crypto.SecretKey;
 import java.net.InetSocketAddress;
@@ -29,11 +28,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server implements ConnectionCallback {
+    private WhiteBoardServer owner;
     private ServerSocketChannel serverSocketChannel;
     private List<Connection> connections;
     private ExecutorService executorService;
-    private SecretKey secretKey;
-    private ImageSender imageSender;
 
     /**
      * Create a ServerSocketChannel.
@@ -41,8 +39,8 @@ public class Server implements ConnectionCallback {
      * @param address
      * @param port
      */
-    public Server(String address, int port) {
-        this(new InetSocketAddress(address, port));
+    public Server(WhiteBoardServer owner, String address, int port) {
+        this(owner, new InetSocketAddress(address, port));
     }
 
     /**
@@ -50,8 +48,8 @@ public class Server implements ConnectionCallback {
      *
      * @param port
      */
-    public Server(int port) {
-        this(new InetSocketAddress(port));
+    public Server(WhiteBoardServer owner, int port) {
+        this(owner, new InetSocketAddress(port));
     }
 
     /**
@@ -59,7 +57,8 @@ public class Server implements ConnectionCallback {
      *
      * @param local SocketAddress
      */
-    public Server(SocketAddress local) {
+    public Server(WhiteBoardServer owner, SocketAddress local) {
+        this.owner = owner;
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(local);
@@ -68,8 +67,6 @@ public class Server implements ConnectionCallback {
         }
         connections = Collections.synchronizedList(new ArrayList<>());
         executorService = Executors.newSingleThreadExecutor();
-        secretKey = SymmetricKeyEncryption.generateKey(256);
-        imageSender = new ImageSender(this);
     }
 
     /**
@@ -77,14 +74,12 @@ public class Server implements ConnectionCallback {
      */
     public void start() {
         executorService.submit(this::accepting);
-        imageSender.start(30);
     }
 
     /**
      * Stop accepting connections.
      */
     public void stop() {
-        imageSender.stop();
         executorService.shutdownNow();
     }
 
@@ -110,6 +105,7 @@ public class Server implements ConnectionCallback {
                     }
 
                     // Encrypt a symmetric key using RSA.
+                    SecretKey secretKey = owner.getSecretKey();
                     PublicKeyEncryption publicKeyEncryption = new PublicKeyEncryption(publicKey, null);
                     byte[] encryptedKey = publicKeyEncryption.encrypt(secretKey.getEncoded());
                     ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + encryptedKey.length);
@@ -124,7 +120,7 @@ public class Server implements ConnectionCallback {
 
                     // Send a connection list.
                     send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
-                    imageSender.refresh();
+                    owner.getImageSender().refresh();
                 }).start();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -176,6 +172,7 @@ public class Server implements ConnectionCallback {
 
     @Override
     public void received(Connection source, ByteBuffer data) {
+        SecretKey secretKey = owner.getSecretKey();
         Data parsed = new Data(data.array(), secretKey);
         if (parsed.dataType == DataType.IMAGE) {
             source.getUser().setImage(parsed.getData());
@@ -198,7 +195,7 @@ public class Server implements ConnectionCallback {
         System.out.println(connection.socketAddress + " (" + connection.id + ") is disconnected.");
         boolean ret = connections.remove(connection);
         if (ret) {
-            send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+            send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(owner.getSecretKey()));
         }
     }
 
@@ -217,9 +214,5 @@ public class Server implements ConnectionCallback {
 
     public List<Connection> getConnections() {
         return connections;
-    }
-
-    public SecretKey getSecretKey() {
-        return secretKey;
     }
 }
