@@ -11,20 +11,38 @@ import java.util.Arrays;
 public class User {
     public final int id;
     private String name;
+    private boolean operator;
     private byte[] image;
     private boolean imageUpdated;
 
     public User(int id) {
         this.id = id;
         name = Naming.generateName();
+        operator = false;
     }
 
     public String getName() {
-        return name;
+        if (operator) {
+            return '*' + name;
+        } else {
+            return name;
+        }
     }
 
     public void setName(String name) {
+        if (name.charAt(0) == '*') {
+            return;
+        }
+
         this.name = name.strip();
+    }
+
+    public boolean isOperator() {
+        return operator;
+    }
+
+    public void setOperator(boolean operator) {
+        this.operator = operator;
     }
 
     public byte[] getImage() {
