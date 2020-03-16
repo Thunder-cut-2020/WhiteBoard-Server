@@ -4,7 +4,7 @@
  * Created Date: 2020-03-02
  */
 
-package com.thunder_cut.ux;
+package com.thunder_cut.data;
 
 import java.util.concurrent.ThreadLocalRandom;
 

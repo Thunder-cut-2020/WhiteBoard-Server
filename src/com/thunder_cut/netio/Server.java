@@ -6,11 +6,12 @@
 
 package com.thunder_cut.netio;
 
+import com.thunder_cut.WhiteBoardServer;
 import com.thunder_cut.command.CommandType;
 import com.thunder_cut.data.Data;
 import com.thunder_cut.data.DataType;
+import com.thunder_cut.data.User;
 import com.thunder_cut.encryption.PublicKeyEncryption;
-import com.thunder_cut.encryption.SymmetricKeyEncryption;
 
 import javax.crypto.SecretKey;
 import java.net.InetSocketAddress;
@@ -28,10 +29,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server implements ConnectionCallback {
+    private WhiteBoardServer owner;
     private ServerSocketChannel serverSocketChannel;
     private List<Connection> connections;
     private ExecutorService executorService;
-    private SecretKey secretKey;
 
     /**
      * Create a ServerSocketChannel.
@@ -39,8 +40,8 @@ public class Server implements ConnectionCallback {
      * @param address
      * @param port
      */
-    public Server(String address, int port) {
-        this(new InetSocketAddress(address, port));
+    public Server(WhiteBoardServer owner, String address, int port) {
+        this(owner, new InetSocketAddress(address, port));
     }
 
     /**
@@ -48,8 +49,8 @@ public class Server implements ConnectionCallback {
      *
      * @param port
      */
-    public Server(int port) {
-        this(new InetSocketAddress(port));
+    public Server(WhiteBoardServer owner, int port) {
+        this(owner, new InetSocketAddress(port));
     }
 
     /**
@@ -57,11 +58,11 @@ public class Server implements ConnectionCallback {
      *
      * @param local SocketAddress
      */
-    public Server(SocketAddress local) {
+    public Server(WhiteBoardServer owner, SocketAddress local) {
+        this.owner = owner;
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(local);
-            secretKey = SymmetricKeyEncryption.generateKey(256);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,6 +106,7 @@ public class Server implements ConnectionCallback {
                     }
 
                     // Encrypt a symmetric key using RSA.
+                    SecretKey secretKey = owner.getSecretKey();
                     PublicKeyEncryption publicKeyEncryption = new PublicKeyEncryption(publicKey, null);
                     byte[] encryptedKey = publicKeyEncryption.encrypt(secretKey.getEncoded());
                     ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES + encryptedKey.length);
@@ -119,6 +121,7 @@ public class Server implements ConnectionCallback {
 
                     // Send a connection list.
                     send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+                    owner.getImageSender().refresh();
                 }).start();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -143,7 +146,10 @@ public class Server implements ConnectionCallback {
      * @param data          data to send
      */
     public void send(int destinationId, ByteBuffer data) {
-        getConnectionById(destinationId).write(data);
+        Connection destination = getConnectionById(destinationId);
+        if (Objects.nonNull(destination)) {
+            destination.write(data);
+        }
     }
 
     /**
@@ -170,20 +176,29 @@ public class Server implements ConnectionCallback {
 
     @Override
     public void received(Connection source, ByteBuffer data) {
+        SecretKey secretKey = owner.getSecretKey();
         Data parsed = new Data(data.array(), secretKey);
-        if (parsed.dataType == DataType.COMMAND) {
+        User user = source.getUser();
+        if (parsed.dataType == DataType.IMAGE) {
+            user.setImage(parsed.getData());
+        } else if (parsed.dataType == DataType.MESSAGE) {
+            System.out.println(user.getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
+            parsed.setSrcId(source.id);
+            send(parsed.toEncrypted(secretKey));
+        } else if (parsed.dataType == DataType.COMMAND) {
             String command = new String(parsed.getData(), StandardCharsets.UTF_8);
             String[] args = command.split(" ");
             if (CommandType.getCommand(args[0]) == CommandType.NAME) {
-                source.setName(command.substring(command.indexOf(' ') + 1));
+                String oldName = user.getName();
+                user.setName(command.substring(command.indexOf(' ') + 1));
+                String newName = user.getName();
+                if (!oldName.equals(newName)) {
+                    String message = oldName + " → " + newName;
+                    System.out.println(message);
+                    send(new Data(DataType.MESSAGE, user.id, message.getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+                }
                 send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
             }
-        } else {
-            if (parsed.dataType == DataType.MESSAGE) {
-                System.out.println(source.getName() + " (" + source.id + "): " + new String(parsed.getData(), StandardCharsets.UTF_8));
-            }
-            parsed.setSrcId(source.id);
-            send(parsed.toEncrypted(secretKey));
         }
     }
 
@@ -192,7 +207,7 @@ public class Server implements ConnectionCallback {
         System.out.println(connection.socketAddress + " (" + connection.id + ") is disconnected.");
         boolean ret = connections.remove(connection);
         if (ret) {
-            send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(secretKey));
+            send(new Data(DataType.LIST, 0, connectionsToString().getBytes(StandardCharsets.UTF_8)).toEncrypted(owner.getSecretKey()));
         }
     }
 
@@ -202,10 +217,14 @@ public class Server implements ConnectionCallback {
         for (Connection connection : array) {
             stringBuilder.append(connection.id);
             stringBuilder.append('/');
-            stringBuilder.append(connection.getName());
+            stringBuilder.append(connection.getUser().getName());
             stringBuilder.append('/');
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         return stringBuilder.toString();
+    }
+
+    public List<Connection> getConnections() {
+        return connections;
     }
 }
