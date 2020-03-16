@@ -21,7 +21,7 @@ public enum CommandType {
 
     public static CommandType getCommand(String command) {
         for (CommandType commandType : CommandType.values()) {
-            if (commandType.command.equals(command)) {
+            if (commandType.command.equalsIgnoreCase(command)) {
                 return commandType;
             }
         }
